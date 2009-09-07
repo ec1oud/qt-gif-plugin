@@ -1,0 +1,97 @@
+giftext does a hex dump of the comment, and it does not display the last line if
+it's less than 16 bytes.  So short comments (less than 16 bytes) aren't
+displayed.
+
+But, giftext DOES handle long comments successfully (352 characters tested).
+
+[sony][10:40:37 PM] giftext /tmp/out.gif
+
+/tmp/out.gif:
+
+        Screen Size - Width = 96, Height = 96.
+        ColorResolution = 8, BitsPerPixel = 8, BackGround = 0.
+        Has Global Color Map.
+
+
+GIF89 comment (Ext Code = 254 [ ]):
+
+00000:  41 20 72 65 61 6c 6c 79 20 72 69 64 69 63 75 6c   A really ridicul
+00010:  6f 75 73 6c 79 20 76 65 72 62 6f 73 65 20 6c 6f   ously verbose lo
+00020:  6e 67 20 63 6f 6d 6d 65 6e 74 20 77 69 74 68 20   ng comment with
+00030:  6c 6f 74 73 20 6f 66 20 72 61 6d 62 6c 69 6e 67   lots of rambling
+00040:  20 6f 6e 20 61 6e 64 20 6f 6e 20 61 6e 64 20 6f    on and on and o
+00050:  6e 2e 2e 2e 20 61 63 74 75 61 6c 6c 79 2c 20 74   n... actually, t
+00060:  68 69 73 20 69 73 20 74 68 65 20 63 6f 6d 6d 65   his is the comme
+00070:  6e 74 20 74 68 61 74 20 6e 65 76 65 72 20 65 6e   nt that never en
+00080:  64 73 2c 20 69 74 20 6a 75 73 74 20 67 6f 65 73   ds, it just goes
+00090:  20 6f 6e 20 61 6e 64 20 6f 6e 2c 20 6d 79 20 66    on and on, my f
+000a0:  72 69 65 6e 64 73 2e 20 20 50 65 6f 70 6c 65 20   riends.  People
+000b0:  73 74 61 72 74 20 72 65 61 64 69 6e 67 20 69 74   start reading it
+000c0:  2c 20 6e 6f 74 20 6b 6e 6f 77 69 6e 67 20 77 68   , not knowing wh
+000d0:  61 74 20 69 74 20 69 73 2c 20 62 75 74 20 74 68   at it is, but th
+000e0:  65 6e 20 61 74 20 74 68 65 20 62 6f 74 74 6f 6d   en at the bottom
+000f0:  20 69 74 20 73 61 79 73 20 27 72 65 61 64 20 61    it says 'read a
+00100:  67 61 69 6e 27 2c 20 61 6e 64 20 73 6f 20 79 6f   gain', and so yo
+00110:  75 20 73 65 65 2c 20 74 68 65 20 62 6f 74 74 6f   u see, the botto
+00120:  6d 20 69 73 6e 27 74 20 72 65 61 6c 6c 79 20 74   m isn't really t
+00130:  68 65 20 65 6e 64 2c 20 62 65 63 61 75 73 65 20   he end, because
+00140:  79 6f 75 20 61 72 65 20 6f 62 6c 69 67 65 64 20   you are obliged
+00150:  74 6f 20 72 65 61 64 20 61 67 61 69 6e 2e 2e 2e   to read again...
+Image #1:
+
+        Image Size - Left = 0, Top = 0, Width = 96, Height = 96.
+        Image is Non Interlaced, BitsPerPixel = 8.
+        Image Has Color Map.
+
+Gif file terminated normally.
+
+
+gifsicle displays short comments successfully but long comments are wrapped.
+
+[sony][10:40:42 PM] gifsicle --info /tmp/out.gif * /tmp/out.gif 1 image logical
+screen 96x96 global color table [256] background 0 + image #0 96x96 comment
+again', and so you see, the bottom isn't really the end, because you are obliged
+to read again...is is the comment that never ends, it just goes on and on, my
+friends.  People start reading it, not knowing what it is, but then at the
+bottom it says 'read
+\000\000\000\000\000!\37777777647\001\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000
+    local color table [256]
+
+gimp has the same problem: reads short comments but long ones get wrapped.
+
+
+To be tested: gifs with various palette sizes.  Seems that if memory serves,
+small non-power-of-2 palette sizes are problematic.
+
+bool QImageWriter::write(const QImage &image)
+{
+    if (!canWrite())
+            return false;
+
+	        if (d->handler->supportsOption(QImageIOHandler::Quality))
+		        d->handler->setOption(QImageIOHandler::Quality, d->quality);
+			    if (d->handler->supportsOption(QImageIOHandler::CompressionRatio))
+			            d->handler->setOption(QImageIOHandler::CompressionRatio, d->compression);
+				        if (d->handler->supportsOption(QImageIOHandler::Gamma))
+					        d->handler->setOption(QImageIOHandler::Gamma, d->gamma);
+						    if (!d->description.isEmpty() && d->handler->supportsOption(QImageIOHandler::Description))
+						            d->handler->setOption(QImageIOHandler::Description, d->descript
+
+but no call to supportsOption?
+
+
+Transparency needs work.  Often the transparent color index is 0 and 
+the background color is 255.  But ImageMagick will display such images
+with the transparent color instead of anything with idx 255.  Why?
+libgif doesn't do it that way, and also doesn't pay attention
+to the "Do we have global color map?" flag in packed bits in the 
+logical screen desc when deciding whether to pay attention to the 
+background color.  Wonder if that's a bug...
+
+already fixed:
+--------------
+If we save a GIF with no comment, xv doesn't like it
+(but ImageMagick and the GIF plugin itself are OK).
+Gimp says
+GIF: bogus character 0x00, ignoring.
+

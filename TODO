@@ -1,0 +1,9 @@
+show checkerboard pattern as background to see transparency
+show on status bar the color index, and visual representation of the color (including checkerboard for transparency)
+read plaintext as text?  (don't see any need to support rendering at this point, unless libgif "just does it")
+
+done
+----
+allow editing the comment field before saving
+read comments
+
